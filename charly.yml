@@ -13,7 +13,8 @@ labwc:
             supervised labwc service must reach a stable RUNNING state at deploy.
         require:
             - '@github.com/opencharly/pod-dbus:v2026.235.2115'
-        # autostart script has a wait-for-supervisord-socket guard (see autostart)
+        # The labwc service's own wait_for: guards its start; `autostart` carries no
+        # guard (it is entirely explanatory now — Chrome is supervised elsewhere).
         env:
             WAYLAND_DISPLAY: "wayland-0"
             XDG_RUNTIME_DIR: "/tmp"
@@ -49,6 +50,16 @@ labwc:
               start_sec: 2
               enable: true
               scope: system
+              # labwc is a NESTED compositor: it connects to pixelflux's wayland-1 as
+              # its parent, and aborts if that socket is not yet listening. The wait
+              # used to be a hand-rolled loop inside labwc-wrapper; as a wait_for it is
+              # supervised, so a timeout fails the service instead of looking like a
+              # labwc crash, and the timeout is honest (the loop slept 0.5s while
+              # counting by 1, so TIMEOUT=30 waited 15s and said 30).
+              wait_for:
+                paths:
+                    - "${XDG_RUNTIME_DIR}/wayland-1"
+                timeout: 30s
         plan:
             - run: mkdir=${HOME}/.local/bin
               mkdir: "${HOME}/.local/bin"
