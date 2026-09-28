@@ -12,7 +12,7 @@ labwc:
             binary and config file is verifiable on the built image, and the
             supervised labwc service must reach a stable RUNNING state at deploy.
         require:
-            - '@github.com/opencharly/pod-dbus:v2026.235.2115'
+            - '@github.com/opencharly/pod-dbus:v2026.243.1831'
         # The labwc service's own wait_for: guards its start; `autostart` carries no
         # guard (it is entirely explanatory now — Chrome is supervised elsewhere).
         env:
